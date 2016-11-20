@@ -1,0 +1,24 @@
+dca-txop.h:   * When sleep operation occurs, if there is a pending packet transmission,
+wifi-phy-state-helper.cc:    m_sleeping (false),
+wifi-phy-state-helper.cc:  if (m_sleeping)
+wifi-phy-state-helper.cc:  m_sleeping = true;
+wifi-phy-state-helper.cc:  m_sleeping = false;
+wifi-phy-state-helper.cc:  //update m_endCcaBusy after the sleep period
+dcf-manager.cc:    m_sleeping (false),
+dcf-manager.cc:  //Deny access if in sleep mode
+dcf-manager.cc:  if (m_sleeping)
+dcf-manager.cc:  m_sleeping = true;
+dcf-manager.cc:  m_sleeping = false;
+mac-low.cc:  NS_LOG_DEBUG ("Device in sleep mode. Cancelling MAC pending events");
+mac-low.h:   * the MAC layer that the device has been put into sleep mode. When the device is put
+mac-low.h:   * into sleep mode, pending MAC transmissions (RTS, CTS, DATA and ACK) are cancelled.
+yans-wifi-phy.cc:      NS_LOG_DEBUG ("channel switching ignored in sleep mode");
+yans-wifi-phy.cc:      NS_LOG_DEBUG ("setting sleep mode postponed until end of current transmission");
+yans-wifi-phy.cc:      NS_LOG_DEBUG ("setting sleep mode postponed until end of current reception");
+yans-wifi-phy.cc:      NS_LOG_DEBUG ("setting sleep mode postponed until end of channel switching");
+yans-wifi-phy.cc:      NS_LOG_DEBUG ("setting sleep mode");
+yans-wifi-phy.cc:      NS_LOG_DEBUG ("already in sleep mode");
+yans-wifi-phy.cc:        NS_LOG_DEBUG ("not in sleep mode, there is nothing to resume");
+yans-wifi-phy.cc:        NS_LOG_DEBUG ("resuming from sleep mode");
+yans-wifi-phy.cc:      NS_LOG_DEBUG ("drop packet because in sleep mode");
+yans-wifi-phy.cc:      NS_LOG_DEBUG ("Dropping packet because in sleep mode");

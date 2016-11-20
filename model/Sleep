@@ -1,0 +1,66 @@
+dca-txop.cc:  virtual void DoNotifySleep (void)
+dca-txop.cc:    m_txop->NotifySleep ();
+dca-txop.cc:DcaTxop::NotifySleep (void)
+edca-txop-n.cc:  virtual void DoNotifySleep (void)
+edca-txop-n.cc:    m_txop->NotifySleep ();
+edca-txop-n.cc:EdcaTxopN::NotifySleep (void)
+wifi-phy-state-helper.h:  bool IsStateSleep (void);
+wifi-phy-state-helper.h:  void SwitchToSleep (void);
+wifi-phy-state-helper.h:  void SwitchFromSleep (Time duration);
+wifi-phy-state-helper.h:  void NotifySleep (void);
+wifi-phy-state-helper.h:  Time m_startSleep;
+wifi-radio-energy-model.cc:    .AddAttribute ("SleepCurrentA",
+wifi-radio-energy-model.cc:                   "The radio Sleep current in Ampere.",
+wifi-radio-energy-model.cc:                   MakeDoubleAccessor (&WifiRadioEnergyModel::SetSleepCurrentA,
+wifi-radio-energy-model.cc:                                       &WifiRadioEnergyModel::GetSleepCurrentA),
+wifi-radio-energy-model.cc:WifiRadioEnergyModel::GetSleepCurrentA (void) const
+wifi-radio-energy-model.cc:WifiRadioEnergyModel::SetSleepCurrentA (double sleepCurrentA)
+wifi-radio-energy-model.cc:WifiRadioEnergyModelPhyListener::NotifySleep (void)
+dca-txop.h:  void NotifySleep (void);
+wifi-phy-state-helper.cc:    m_startSleep (Seconds (0)),
+wifi-phy-state-helper.cc:WifiPhyStateHelper::IsStateSleep (void)
+wifi-phy-state-helper.cc:WifiPhyStateHelper::NotifySleep (void)
+wifi-phy-state-helper.cc:      (*i)->NotifySleep ();
+wifi-phy-state-helper.cc:WifiPhyStateHelper::SwitchToSleep (void)
+wifi-phy-state-helper.cc:  m_startSleep = now;
+wifi-phy-state-helper.cc:  NotifySleep ();
+wifi-phy-state-helper.cc:  NS_ASSERT (IsStateSleep ());
+wifi-phy-state-helper.cc:WifiPhyStateHelper::SwitchFromSleep (Time duration)
+wifi-phy-state-helper.cc:  NS_ASSERT (IsStateSleep ());
+wifi-phy-state-helper.cc:  m_stateLogger (m_startSleep, now - m_startSleep, WifiPhy::SLEEP);
+yans-wifi-phy.h:  virtual void SetSleepMode (void);
+yans-wifi-phy.h:  virtual void ResumeFromSleep (void);
+yans-wifi-phy.h:  virtual bool IsStateSleep (void);
+wifi-radio-energy-model.h:  virtual void NotifySleep (void);
+wifi-radio-energy-model.h: *  3. Go_to_Sleep: State goes from IDLE to SLEEP.
+wifi-radio-energy-model.h: *  4. End_of_Sleep: State goes from SLEEP to IDLE.
+wifi-radio-energy-model.h:  double GetSleepCurrentA (void) const;
+wifi-radio-energy-model.h:  void SetSleepCurrentA (double sleepCurrentA);
+dcf-manager.cc:DcfState::NotifySleep (void)
+dcf-manager.cc:  DoNotifySleep ();
+dcf-manager.cc:  virtual void NotifySleep (void)
+dcf-manager.cc:    m_dcf->NotifySleepNow ();
+dcf-manager.cc:DcfManager::NotifySleepNow (void)
+dcf-manager.cc:      state->NotifySleep ();
+mac-low.cc:  virtual void NotifySleep (void)
+mac-low.cc:    m_macLow->NotifySleepNow ();
+mac-low.cc:MacLow::NotifySleepNow (void)
+mac-low.h:  void NotifySleepNow (void);
+edca-txop-n.h:  void NotifySleep (void);
+yans-wifi-phy.cc:YansWifiPhy::SetSleepMode (void)
+yans-wifi-phy.cc:      Simulator::Schedule (GetDelayUntilIdle (), &YansWifiPhy::SetSleepMode, this);
+yans-wifi-phy.cc:      Simulator::Schedule (GetDelayUntilIdle (), &YansWifiPhy::SetSleepMode, this);
+yans-wifi-phy.cc:      Simulator::Schedule (GetDelayUntilIdle (), &YansWifiPhy::SetSleepMode, this);
+yans-wifi-phy.cc:      m_state->SwitchToSleep ();
+yans-wifi-phy.cc:YansWifiPhy::ResumeFromSleep (void)
+yans-wifi-phy.cc:        m_state->SwitchFromSleep (delayUntilCcaEnd);
+yans-wifi-phy.cc:  if (m_state->IsStateSleep ())
+yans-wifi-phy.cc:YansWifiPhy::IsStateSleep (void)
+yans-wifi-phy.cc:  return m_state->IsStateSleep ();
+dcf-manager.h:  void NotifySleep (void);
+dcf-manager.h:  virtual void DoNotifySleep (void) = 0;
+dcf-manager.h:  void NotifySleepNow (void);
+wifi-phy.h:  virtual void NotifySleep (void) = 0;
+wifi-phy.h:  virtual void SetSleepMode (void) = 0;
+wifi-phy.h:  virtual void ResumeFromSleep (void) = 0;
+wifi-phy.h:  virtual bool IsStateSleep (void) = 0;
