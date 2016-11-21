@@ -597,6 +597,9 @@ public:
    */
   typedef void (* TracedCallback)(const WifiMacHeader &header);
 
+  void SetPwrMgt(void);
+  void ResetPwrMgt(void);
+  bool IsPwnMgt(void) const;
 
 private:
   /**
@@ -636,6 +639,9 @@ private:
    */
   void PrintFrameControl (std::ostream &os) const;
 
+
+
+
   uint8_t m_ctrlType;
   uint8_t m_ctrlSubtype;
   uint8_t m_ctrlToDs;
@@ -657,6 +663,7 @@ private:
   uint8_t m_qosAckPolicy;
   uint8_t m_amsduPresent;
   uint16_t m_qosStuff;
+  uint8_t pwrMgt;
 };
 
 } //namespace ns3

@@ -3,6 +3,7 @@
 def build(bld):
     obj = bld.create_ns3_module('wifi', ['network', 'propagation', 'energy'])
     obj.source = [
+        'model/tim.cc',
         'model/wifi-information-element.cc',
         'model/wifi-information-element-vector.cc',
         'model/wifi-channel.cc',
@@ -100,6 +101,7 @@ def build(bld):
     headers = bld(features='ns3header')
     headers.module = 'wifi'
     headers.source = [
+        'model/tim.h',
         'model/wifi-information-element.h',
         'model/wifi-information-element-vector.h',
         'model/wifi-net-device.h',

@@ -50,7 +50,8 @@ WifiMacHeader::WifiMacHeader ()
   : m_ctrlMoreData (0),
     m_ctrlWep (0),
     m_ctrlOrder (1),
-    m_amsduPresent (0)
+    m_amsduPresent (0),
+    pwrMgt(0)
 {
 }
 
@@ -943,6 +944,24 @@ WifiMacHeader::SetQosControl (uint16_t qos)
   m_qosStuff = (qos >> 8) & 0x00ff;
 }
 
+void
+WifiMacHeader::SetPwrMgt(void)
+{
+  pwrMgt = 1;
+}
+
+void
+WifiMacHeader::ResetPwrMgt(void)
+{
+  pwrMgt = 0;
+}
+
+bool
+WifiMacHeader::IsPwnMgt(void) const
+{
+  return pwrMgt != 0;
+}
+
 uint32_t
 WifiMacHeader::GetSize (void) const
 {
@@ -972,7 +991,7 @@ WifiMacHeader::GetSize (void) const
         }
       break;
     case TYPE_DATA:
-      size = 2 + 2 + 6 + 6 + 6 + 2;
+      size = 2 + 2 + 6 + 6 + 6 + 2 + 1;
       if (m_ctrlToDs && m_ctrlFromDs)
         {
           size += 6;
@@ -1201,6 +1220,7 @@ WifiMacHeader::Serialize (Buffer::Iterator i) const
         WriteTo (i, m_addr2);
         WriteTo (i, m_addr3);
         i.WriteHtolsbU16 (GetSequenceControl ());
+        i.WriteU8(pwrMgt); 
         if (m_ctrlToDs && m_ctrlFromDs)
           {
             WriteTo (i, m_addr4);
@@ -1251,6 +1271,7 @@ WifiMacHeader::Deserialize (Buffer::Iterator start)
       ReadFrom (i, m_addr2);
       ReadFrom (i, m_addr3);
       SetSequenceControl (i.ReadLsbtohU16 ());
+      pwrMgt = i.ReadU8 ();
       if (m_ctrlToDs && m_ctrlFromDs)
         {
           ReadFrom (i, m_addr4);

@@ -34,6 +34,7 @@
 #include "ht-operations.h"
 #include "vht-capabilities.h"
 #include "erp-information.h"
+#include "tim.h"
 
 namespace ns3 {
 
@@ -490,6 +491,13 @@ public:
    * \return The TypeId.
    */
   static TypeId GetTypeId (void);
+  Tim GetTim(void);
+  void SetTim(Tim tim);
+  uint32_t GetSerializedSize (void) const;
+  void Serialize (Buffer::Iterator start) const;
+  uint32_t Deserialize (Buffer::Iterator start);
+private:
+  Tim tim;
 };
 
 

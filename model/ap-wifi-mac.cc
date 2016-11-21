@@ -103,6 +103,8 @@ ApWifiMac::~ApWifiMac ()
 {
   NS_LOG_FUNCTION (this);
   m_staList.clear();
+  sleepList.clear();
+  sleepMap.clear();
   m_nonErpStations.clear ();
   m_nonHtStations.clear ();
 }
@@ -321,6 +323,13 @@ void
 ApWifiMac::Enqueue (Ptr<const Packet> packet, Mac48Address to, Mac48Address from)
 {
   NS_LOG_FUNCTION (this << packet << to << from);
+  if (sleepList.find(to) != sleepList.end())
+  {
+    tim.AddNodeIp(to);
+    pair<Mac48Address, Ptr<const Packet> > p = make_pair(from, packet);
+    sleepMap.insert(pair<Mac48Address, pair<Mac48Address, Ptr<const Packet> > >(to, p));
+    return;
+  }
   if (to.IsBroadcast () || m_stationManager->IsAssociated (to))
     {
       ForwardDown (packet, from, to);
@@ -531,6 +540,13 @@ ApWifiMac::SendAssocResp (Mac48Address to, bool success)
   m_dca->Queue (packet, hdr);
 }
 
+
+Tim
+ApWifiMac::GetTim(void)
+{
+  return tim;
+}
+
 void
 ApWifiMac::SendOneBeacon (void)
 {
@@ -548,6 +564,7 @@ ApWifiMac::SendOneBeacon (void)
   beacon.SetSupportedRates (GetSupportedRates ());
   beacon.SetBeaconIntervalUs (m_beaconInterval.GetMicroSeconds ());
   beacon.SetCapabilities (GetCapabilities ());
+  beacon.SetTim(GetTim());
   m_stationManager->SetShortPreambleEnabled (GetShortPreambleEnabled ());
   m_stationManager->SetShortSlotTimeEnabled (GetShortSlotTimeEnabled ());
   if (m_erpSupported)
@@ -650,7 +667,24 @@ ApWifiMac::Receive (Ptr<Packet> packet, const WifiMacHeader *hdr)
                 }
               else
                 {
-                  ForwardUp (packet, from, bssid);
+                  ForwardUp (packet, from, bssid); // maybe null data catch..?
+                  if(hdr->IsPwnMgt())
+                  {
+                    sleepList.insert(from);
+                  }
+                  else
+                  {
+                    for(std::set<Mac48Address>::iterator i = sleepList.begin(); i != sleepList.end(); i++)
+                    {
+                      if(*i == from)
+                        sleepList.erase(i);
+                    }
+                    pair<multimap<Mac48Address, pair<Mac48Address, Ptr<const Packet> > >::iterator, multimap<Mac48Address, pair<Mac48Address, Ptr<const Packet> > >::iterator> p = sleepMap.equal_range(from);
+                    for(multimap<Mac48Address, pair<Mac48Address, Ptr<const Packet> > >::iterator i=p.first; i!=p.second; i++)
+                    {
+                      Enqueue(i->second.second, from, i->second.first); 
+                    }
+                  }
                 }
             }
           else if (to.IsGroup ()

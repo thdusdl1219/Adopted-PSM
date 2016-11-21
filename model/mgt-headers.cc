@@ -373,6 +373,44 @@ MgtBeaconHeader::GetTypeId (void)
   return tid;
 }
 
+Tim
+MgtBeaconHeader::GetTim(void)
+{
+  return tim;
+}
+
+void
+MgtBeaconHeader::SetTim(Tim tim)
+{
+  this->tim = tim;
+}
+
+uint32_t
+MgtBeaconHeader::GetSerializedSize (void) const
+{
+  uint32_t size = 0;
+  size = MgtProbeResponseHeader::GetSerializedSize();
+  size += tim.GetSerializedSize();
+  return size;
+}
+
+void
+MgtBeaconHeader::Serialize (Buffer::Iterator start) const
+{
+
+  Buffer::Iterator i = start;
+  MgtProbeResponseHeader::Serialize(i);
+  i = tim.Serialize(i);
+}
+
+uint32_t
+MgtBeaconHeader::Deserialize (Buffer::Iterator start)
+{
+  Buffer::Iterator i = start;
+  MgtProbeResponseHeader::Deserialize(i);
+  i = tim.DeserializeIfPresent(i);
+  return i.GetDistanceFrom (start);
+}
 
 /***********************************************************
  *          Assoc Request

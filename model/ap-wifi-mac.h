@@ -32,7 +32,11 @@
 #include "supported-rates.h"
 #include "erp-information.h"
 #include "ns3/random-variable-stream.h"
+#include "tim.h"
+#include <map>
+#include <utility>
 
+using namespace std;
 namespace ns3 {
 
 /**
@@ -244,6 +248,8 @@ private:
   virtual void DoDispose (void);
   virtual void DoInitialize (void);
 
+  Tim GetTim(void);
+
   Ptr<DcaTxop> m_beaconDca;                  //!< Dedicated DcaTxop for beacons
   Time m_beaconInterval;                     //!< Interval between beacons
   bool m_enableBeaconGeneration;             //!< Flag whether beacons are being generated
@@ -254,6 +260,9 @@ private:
   std::list<Mac48Address> m_nonErpStations;  //!< List of all non-ERP stations currently associated to the AP
   std::list<Mac48Address> m_nonHtStations;   //!< List of all non-HT stations currently associated to the AP
   bool m_enableNonErpProtection;             //!< Flag whether protection mechanism is used or not when non-ERP STAs are present within the BSS
+  Tim tim;
+  set<Mac48Address> sleepList;
+  multimap<Mac48Address,pair<Mac48Address, Ptr<const Packet> > > sleepMap;
 };
 
 } //namespace ns3

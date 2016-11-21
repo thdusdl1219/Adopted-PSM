@@ -1,0 +1,10 @@
+.*.swp
+.*.swo
+build*
+lib*
+core
+*test*
+file*
+tags
+*LOG*
+*.zip
