@@ -567,23 +567,26 @@ StaWifiMac::Receive (Ptr<Packet> packet, const WifiMacHeader *hdr)
           {
             // TODO ResumeFromSleep
             // m_phy->ResumeFromSleep();
+            MacState tmp = m_state;
             SetState(ASSOCIATED);
             //m_sleeping = false;
             //m_phy->ResumeFromSleep();
             const Packet *p = new Packet();
             std::cout << "SendPwrExistTim!" << std::endl;
             Enqueue(Ptr<const Packet>(p), hdr->GetAddr3());
+            SetState(tmp);
             //m_sleeping = false;
           }
-          else if(m_sleeping == false) 
+           else if(m_sleeping == false) 
           {
+            MacState tmp = m_state;
             SetState(ASSOCIATED);
-            std::cout << "SendPwr!" << std::endl;
-            //m_phy->SetSleepMode();
+            m_phy->SetSleepMode();
             m_sleeping = true;
-            //Simulator::Schedule(MicroSeconds(beacon.GetBeaconIntervalUs()), &StaWifiMac::ResumeFromSleep, this);  
+            Simulator::Schedule(MicroSeconds(beacon.GetBeaconIntervalUs()), &StaWifiMac::ResumeFromSleep, this);  
             const Packet *p = new Packet();
             Enqueue(Ptr<const Packet>(p), hdr->GetAddr3());
+            SetState(tmp);
           }
         }
       if (goodBeacon && m_state == BEACON_MISSED)
