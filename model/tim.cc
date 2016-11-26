@@ -15,6 +15,7 @@ namespace ns3 {
   void Tim::AddNodeIp(Mac48Address a)
   {
     addressList.insert(a);
+    size = addressList.size();
   }
   void Tim::DeleteNodeIp(Mac48Address a)
   {
@@ -23,6 +24,16 @@ namespace ns3 {
       if(*i == a)
         addressList.erase(i);
     }
+    size = addressList.size();
+  }
+  bool Tim::ExistNodeIp(Mac48Address a)
+  {
+    for(set<Mac48Address>::iterator i = addressList.begin(); i != addressList.end(); i++)
+    {
+      if(*i == a)
+        return true;
+    }
+    return false;
   }
   WifiInformationElementId
   Tim::ElementId () const

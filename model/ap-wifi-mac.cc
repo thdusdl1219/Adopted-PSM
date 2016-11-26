@@ -36,6 +36,7 @@
 #include "mac-low.h"
 #include "amsdu-subframe-header.h"
 #include "msdu-aggregator.h"
+#include <iostream>
 
 namespace ns3 {
 
@@ -323,12 +324,27 @@ void
 ApWifiMac::Enqueue (Ptr<const Packet> packet, Mac48Address to, Mac48Address from)
 {
   NS_LOG_FUNCTION (this << packet << to << from);
+  /* for(set<Mac48Address>::iterator i = sleepList.begin(); i != sleepList.end(); i++)
+  {
+    std::cout << "MAC ADDRESS : " << *i << " : " << to << endl;
+  } */
   if (sleepList.find(to) != sleepList.end())
   {
+    std::cout << "EXIST IN SLEEPLIST" << to << endl; 
     tim.AddNodeIp(to);
     pair<Mac48Address, Ptr<const Packet> > p = make_pair(from, packet);
     sleepMap.insert(pair<Mac48Address, pair<Mac48Address, Ptr<const Packet> > >(to, p));
     return;
+  }
+  else if(to.IsBroadcast())
+  {
+    for(set<Mac48Address>::iterator i = sleepList.begin(); i != sleepList.end(); i++)
+    {
+      std::cout << "EXIST IN SLEEPLIST" << to << endl; 
+      tim.AddNodeIp(*i);
+      pair<Mac48Address, Ptr<const Packet> > p = make_pair(from, packet);
+      sleepMap.insert(pair<Mac48Address, pair<Mac48Address, Ptr<const Packet> > >(*i, p));
+    }
   }
   if (to.IsBroadcast () || m_stationManager->IsAssociated (to))
     {
@@ -641,8 +657,33 @@ ApWifiMac::Receive (Ptr<Packet> packet, const WifiMacHeader *hdr)
   Mac48Address from = hdr->GetAddr2 ();
 
   if (hdr->IsData ())
+  {
+    if(packet->GetSize() == 0)
     {
-      Mac48Address bssid = hdr->GetAddr1 ();
+      if(hdr->IsPwnMgt())
+      {
+        sleepList.insert(from);
+        std::cout << "INSERT SLEEPLIST IN AP" << from << std::endl;
+      }
+      else
+      {
+        for(std::set<Mac48Address>::iterator i = sleepList.begin(); i != sleepList.end(); i++)
+        {
+          if(*i == from)
+            sleepList.erase(i);
+        }
+        tim.DeleteNodeIp(from);
+        pair<multimap<Mac48Address, pair<Mac48Address, Ptr<const Packet> > >::iterator, multimap<Mac48Address, pair<Mac48Address, Ptr<const Packet> > >::iterator> p = sleepMap.equal_range(from);
+        for(multimap<Mac48Address, pair<Mac48Address, Ptr<const Packet> > >::iterator i=p.first; i!=p.second; i++)
+        {
+          ForwardDown(i->second.second, i->second.first, from);
+          std::cout << "SEND PACKET" << i->second.first << from << endl;
+        }
+        sleepMap.erase(from);
+      }
+      return;
+    }
+    Mac48Address bssid = hdr->GetAddr1 ();
       if (!hdr->IsFromDs ()
           && hdr->IsToDs ()
           && bssid == GetAddress ()
@@ -667,24 +708,8 @@ ApWifiMac::Receive (Ptr<Packet> packet, const WifiMacHeader *hdr)
                 }
               else
                 {
-                  ForwardUp (packet, from, bssid); // maybe null data catch..?
-                  if(hdr->IsPwnMgt())
-                  {
-                    sleepList.insert(from);
-                  }
-                  else
-                  {
-                    for(std::set<Mac48Address>::iterator i = sleepList.begin(); i != sleepList.end(); i++)
-                    {
-                      if(*i == from)
-                        sleepList.erase(i);
-                    }
-                    pair<multimap<Mac48Address, pair<Mac48Address, Ptr<const Packet> > >::iterator, multimap<Mac48Address, pair<Mac48Address, Ptr<const Packet> > >::iterator> p = sleepMap.equal_range(from);
-                    for(multimap<Mac48Address, pair<Mac48Address, Ptr<const Packet> > >::iterator i=p.first; i!=p.second; i++)
-                    {
-                      Enqueue(i->second.second, from, i->second.first); 
-                    }
-                  }
+                  
+                  ForwardUp (packet, from, bssid); // TODO maybe null data catch..?
                 }
             }
           else if (to.IsGroup ()
@@ -728,6 +753,7 @@ ApWifiMac::Receive (Ptr<Packet> packet, const WifiMacHeader *hdr)
     }
   else if (hdr->IsMgt ())
     {
+                  std::cout << "MGT" << std::endl;
       if (hdr->IsProbeReq ())
         {
           NS_ASSERT (hdr->GetAddr1 ().IsBroadcast ());

@@ -14,14 +14,15 @@ namespace ns3 {
     ~Tim();
     void AddNodeIp(Mac48Address a);
     void DeleteNodeIp(Mac48Address a);
+    bool ExistNodeIp(Mac48Address a);
     WifiInformationElementId ElementId () const;
     uint8_t GetInformationFieldSize () const;
     void SerializeInformationField (Buffer::Iterator start) const;
     uint8_t DeserializeInformationField (Buffer::Iterator start,
                                        uint8_t length);
+    set<Mac48Address> addressList;
   private:
     int size;
-    set<Mac48Address> addressList;
   };
 }
 

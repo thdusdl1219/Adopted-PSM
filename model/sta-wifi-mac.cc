@@ -39,6 +39,7 @@
 #include "ht-capabilities.h"
 #include "ht-operations.h"
 #include "vht-capabilities.h"
+#include <iostream>
 
 /*
  * The state machine for this STA is:
@@ -106,7 +107,8 @@ StaWifiMac::StaWifiMac ()
   : m_state (BEACON_MISSED),
     m_probeRequestEvent (),
     m_assocRequestEvent (),
-    m_beaconWatchdogEnd (Seconds (0.0))
+    m_beaconWatchdogEnd (Seconds (0.0)),
+    m_sleeping(0)
 {
   NS_LOG_FUNCTION (this);
 
@@ -410,6 +412,16 @@ StaWifiMac::Enqueue (Ptr<const Packet> packet, Mac48Address to)
   hdr.SetAddr3 (to);
   hdr.SetDsNotFrom ();
   hdr.SetDsTo ();
+  if(packet->GetSize() == 0 && m_sleeping == false)
+  {
+    hdr.ResetPwrMgt();
+    std::cout << "ResetPwrMgt!!" << std::endl;
+  }
+  else if(packet->GetSize() == 0 && m_sleeping == true)
+  {
+    hdr.SetPwrMgt();
+    std::cout << "SetPwrMgt!!" << std::endl;
+  }
 
   if (m_qosSupported)
     {
@@ -421,6 +433,13 @@ StaWifiMac::Enqueue (Ptr<const Packet> packet, Mac48Address to)
     {
       m_dca->Queue (packet, hdr);
     }
+}
+
+void
+StaWifiMac::ResumeFromSleep ()
+{
+  m_phy->ResumeFromSleep();
+  m_sleeping = false;
 }
 
 void
@@ -475,6 +494,8 @@ StaWifiMac::Receive (Ptr<Packet> packet, const WifiMacHeader *hdr)
         }
       else
         {
+          //TODO is Data packet?
+          
           ForwardUp (packet, hdr->GetAddr3 (), hdr->GetAddr1 ());
         }
       return;
@@ -541,6 +562,29 @@ StaWifiMac::Receive (Ptr<Packet> packet, const WifiMacHeader *hdr)
             }
           m_stationManager->SetShortPreambleEnabled (isShortPreambleEnabled);
           m_stationManager->SetShortSlotTimeEnabled (capabilities.IsShortSlotTime ());
+          Tim tim = beacon.GetTim();
+          if(tim.ExistNodeIp(GetAddress()))
+          {
+            // TODO ResumeFromSleep
+            // m_phy->ResumeFromSleep();
+            SetState(ASSOCIATED);
+            //m_sleeping = false;
+            //m_phy->ResumeFromSleep();
+            const Packet *p = new Packet();
+            std::cout << "SendPwrExistTim!" << std::endl;
+            Enqueue(Ptr<const Packet>(p), hdr->GetAddr3());
+            //m_sleeping = false;
+          }
+          else if(m_sleeping == false) 
+          {
+            SetState(ASSOCIATED);
+            std::cout << "SendPwr!" << std::endl;
+            //m_phy->SetSleepMode();
+            m_sleeping = true;
+            //Simulator::Schedule(MicroSeconds(beacon.GetBeaconIntervalUs()), &StaWifiMac::ResumeFromSleep, this);  
+            const Packet *p = new Packet();
+            Enqueue(Ptr<const Packet>(p), hdr->GetAddr3());
+          }
         }
       if (goodBeacon && m_state == BEACON_MISSED)
         {
