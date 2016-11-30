@@ -399,16 +399,16 @@ MgtBeaconHeader::Serialize (Buffer::Iterator start) const
 {
 
   Buffer::Iterator i = start;
-  MgtProbeResponseHeader::Serialize(i);
   i = tim.Serialize(i);
+  MgtProbeResponseHeader::Serialize(i);
 }
 
 uint32_t
 MgtBeaconHeader::Deserialize (Buffer::Iterator start)
 {
   Buffer::Iterator i = start;
-  MgtProbeResponseHeader::Deserialize(i);
   i = tim.DeserializeIfPresent(i);
+  MgtProbeResponseHeader::Deserialize(i);
   return i.GetDistanceFrom (start);
 }
 

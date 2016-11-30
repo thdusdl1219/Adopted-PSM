@@ -601,6 +601,7 @@ ApWifiMac::SendOneBeacon (void)
 
   //The beacon has it's own special queue, so we load it in there
   m_beaconDca->Queue (packet, hdr);
+  std::cout << "beaconInterval : " << m_beaconInterval << std::endl;
   m_beaconEvent = Simulator::Schedule (m_beaconInterval, &ApWifiMac::SendOneBeacon, this);
   
   //If a STA that does not support Short Slot Time associates,

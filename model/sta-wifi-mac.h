@@ -179,6 +179,7 @@ private:
   CapabilityInformation GetCapabilities (void) const;
 
   void ResumeFromSleep(void);
+  void SendNullPacket(Mac48Address);
 
   enum MacState m_state;
   Time m_probeRequestTimeout;
@@ -186,10 +187,13 @@ private:
   EventId m_probeRequestEvent;
   EventId m_assocRequestEvent;
   EventId m_beaconWatchdog;
+  EventId m_sendNullPacket;
   Time m_beaconWatchdogEnd;
   uint32_t m_maxMissedBeacons;
   bool m_activeProbing;
   bool m_sleeping;
+  int64_t beaconInterval;
+  Time lastbeacon;
 
   TracedCallback<Mac48Address> m_assocLogger;
   TracedCallback<Mac48Address> m_deAssocLogger;

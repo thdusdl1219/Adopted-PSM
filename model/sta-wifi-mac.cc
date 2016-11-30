@@ -41,6 +41,8 @@
 #include "vht-capabilities.h"
 #include <iostream>
 
+#define THRESHOLD (beaconInterval / 5)
+
 /*
  * The state machine for this STA is:
  --------------                                          -----------
@@ -107,8 +109,11 @@ StaWifiMac::StaWifiMac ()
   : m_state (BEACON_MISSED),
     m_probeRequestEvent (),
     m_assocRequestEvent (),
+    m_sendNullPacket (),
     m_beaconWatchdogEnd (Seconds (0.0)),
-    m_sleeping(0)
+    m_sleeping(0),
+    beaconInterval(0),
+    lastbeacon(Seconds (0.0))
 {
   NS_LOG_FUNCTION (this);
 
@@ -436,10 +441,25 @@ StaWifiMac::Enqueue (Ptr<const Packet> packet, Mac48Address to)
 }
 
 void
-StaWifiMac::ResumeFromSleep ()
+StaWifiMac::ResumeFromSleep (void)
 {
   m_phy->ResumeFromSleep();
-  m_sleeping = false;
+  //m_sleeping = false;
+}
+
+void
+StaWifiMac::SendNullPacket (Mac48Address to)
+{
+  MacState tmp = m_state;
+  SetState(ASSOCIATED);
+  const Packet *p = new Packet();
+  m_phy->SetSleepMode();
+  m_sleeping = true;
+  Simulator::Schedule(Simulator::Now () - lastbeacon, &StaWifiMac::ResumeFromSleep, this);
+  Enqueue(Ptr<const Packet>(p), to);
+  std::cout << "SEND NULL PACKET" << std::endl;
+  SetState(tmp);
+
 }
 
 void
@@ -495,7 +515,17 @@ StaWifiMac::Receive (Ptr<Packet> packet, const WifiMacHeader *hdr)
       else
         {
           //TODO is Data packet?
-          
+          if(m_sendNullPacket.IsRunning())
+          {
+            m_sendNullPacket.Cancel();
+          }
+          if(beaconInterval != 0) 
+          {
+            std::cout << "SCHEDULE NULL PACKET" << std::endl;
+            m_sendNullPacket = Simulator::Schedule(MicroSeconds(THRESHOLD), 
+              &StaWifiMac::SendNullPacket, this, hdr->GetAddr3 ());
+          }
+           
           ForwardUp (packet, hdr->GetAddr3 (), hdr->GetAddr1 ());
         }
       return;
@@ -535,6 +565,7 @@ StaWifiMac::Receive (Ptr<Packet> packet, const WifiMacHeader *hdr)
         {
           Time delay = MicroSeconds (beacon.GetBeaconIntervalUs () * m_maxMissedBeacons);
           RestartBeaconWatchdog (delay);
+          lastbeacon = Simulator::Now();
           SetBssid (hdr->GetAddr3 ());
           bool isShortPreambleEnabled = capabilities.IsShortPreamble ();
           if (m_erpSupported)
@@ -563,19 +594,22 @@ StaWifiMac::Receive (Ptr<Packet> packet, const WifiMacHeader *hdr)
           m_stationManager->SetShortPreambleEnabled (isShortPreambleEnabled);
           m_stationManager->SetShortSlotTimeEnabled (capabilities.IsShortSlotTime ());
           Tim tim = beacon.GetTim();
+          for(set<Mac48Address>::iterator i = tim.addressList.begin(); i != tim.addressList.end(); i++)
+          {
+            cout << "TIM ADDRESS : " << *i << endl;
+          }
           if(tim.ExistNodeIp(GetAddress()))
           {
-            // TODO ResumeFromSleep
-            // m_phy->ResumeFromSleep();
+            beaconInterval = beacon.GetBeaconIntervalUs();
+          cout << beacon.GetBeaconIntervalUs() << endl;
+          cout << beaconInterval << endl;
             MacState tmp = m_state;
             SetState(ASSOCIATED);
-            //m_sleeping = false;
-            //m_phy->ResumeFromSleep();
             const Packet *p = new Packet();
             std::cout << "SendPwrExistTim!" << std::endl;
+            m_sleeping = false;
             Enqueue(Ptr<const Packet>(p), hdr->GetAddr3());
             SetState(tmp);
-            //m_sleeping = false;
           }
            else if(m_sleeping == false) 
           {
