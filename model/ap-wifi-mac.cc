@@ -663,7 +663,7 @@ ApWifiMac::Receive (Ptr<Packet> packet, const WifiMacHeader *hdr)
       if(hdr->IsPwnMgt())
       {
         sleepList.insert(from);
-        std::cout << "This address (" << from << ") is inserted into sleepList in AP" << std::endl;
+        std::cout << "This address (" << from << ") is inserted into sleepSet in AP" << std::endl;
       }
       else
       {

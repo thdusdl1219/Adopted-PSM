@@ -445,7 +445,7 @@ StaWifiMac::ResumeFromSleep (void)
 {
   m_phy->ResumeFromSleep();
   cout << "Node Wake up!" << endl;
-  //m_sleeping = false;
+  m_sleeping = false;
 }
 
 void
@@ -456,8 +456,8 @@ StaWifiMac::SendNullPacket (Mac48Address to)
   const Packet *p = new Packet();
   m_phy->SetSleepMode();
   cout << "Node becomes sleeping... Zzz1" << endl;
-  m_sleeping = true;
   Simulator::Schedule(Simulator::Now () - lastbeacon, &StaWifiMac::ResumeFromSleep, this);
+  m_sleeping = true;
   Enqueue(Ptr<const Packet>(p), to);
   SetState(tmp);
 
@@ -608,7 +608,7 @@ StaWifiMac::Receive (Ptr<Packet> packet, const WifiMacHeader *hdr)
             SetState(ASSOCIATED);
             const Packet *p = new Packet();
             //std::cout << "SendPwrExistTim!" << std::endl;
-            m_sleeping = false;
+            //m_sleeping = false;
             Enqueue(Ptr<const Packet>(p), hdr->GetAddr3());
             SetState(tmp);
           }
@@ -618,10 +618,10 @@ StaWifiMac::Receive (Ptr<Packet> packet, const WifiMacHeader *hdr)
             SetState(ASSOCIATED);
             m_phy->SetSleepMode();
             cout << "Node becomes sleeping... Zzz2" << endl;
-            m_sleeping = true;
-            cout << beacon.GetBeaconIntervalUs() << endl;
+            //cout << beacon.GetBeaconIntervalUs() << endl;
             Simulator::Schedule(MicroSeconds(beacon.GetBeaconIntervalUs()), &StaWifiMac::ResumeFromSleep, this);  
             const Packet *p = new Packet();
+            m_sleeping = true;
             Enqueue(Ptr<const Packet>(p), hdr->GetAddr3());
             SetState(tmp);
           }
