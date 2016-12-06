@@ -330,7 +330,7 @@ ApWifiMac::Enqueue (Ptr<const Packet> packet, Mac48Address to, Mac48Address from
   } */
   if (sleepList.find(to) != sleepList.end())
   {
-    std::cout << "EXIST IN SLEEPLIST" << to << endl; 
+    std::cout << "Packet saved into queue, its destination is : " << to << endl; 
     tim.AddNodeIp(to);
     pair<Mac48Address, Ptr<const Packet> > p = make_pair(from, packet);
     sleepMap.insert(pair<Mac48Address, pair<Mac48Address, Ptr<const Packet> > >(to, p));
@@ -340,7 +340,7 @@ ApWifiMac::Enqueue (Ptr<const Packet> packet, Mac48Address to, Mac48Address from
   {
     for(set<Mac48Address>::iterator i = sleepList.begin(); i != sleepList.end(); i++)
     {
-      std::cout << "EXIST IN SLEEPLIST" << to << endl; 
+      std::cout << "Packet saved into queue, its destination is : " << *i << endl; 
       tim.AddNodeIp(*i);
       pair<Mac48Address, Ptr<const Packet> > p = make_pair(from, packet);
       sleepMap.insert(pair<Mac48Address, pair<Mac48Address, Ptr<const Packet> > >(*i, p));
@@ -601,7 +601,6 @@ ApWifiMac::SendOneBeacon (void)
 
   //The beacon has it's own special queue, so we load it in there
   m_beaconDca->Queue (packet, hdr);
-  std::cout << "beaconInterval : " << m_beaconInterval << std::endl;
   m_beaconEvent = Simulator::Schedule (m_beaconInterval, &ApWifiMac::SendOneBeacon, this);
   
   //If a STA that does not support Short Slot Time associates,
@@ -664,7 +663,7 @@ ApWifiMac::Receive (Ptr<Packet> packet, const WifiMacHeader *hdr)
       if(hdr->IsPwnMgt())
       {
         sleepList.insert(from);
-        std::cout << "INSERT SLEEPLIST IN AP" << from << std::endl;
+        std::cout << "This address (" << from << ") is inserted into sleepList in AP" << std::endl;
       }
       else
       {
@@ -678,7 +677,7 @@ ApWifiMac::Receive (Ptr<Packet> packet, const WifiMacHeader *hdr)
         for(multimap<Mac48Address, pair<Mac48Address, Ptr<const Packet> > >::iterator i=p.first; i!=p.second; i++)
         {
           ForwardDown(i->second.second, i->second.first, from);
-          std::cout << "SEND PACKET" << i->second.first << from << endl;
+          std::cout << "Retransmit Packet (from : " << i->second.first << ", to : " << from <<")"<< endl;
         }
         sleepMap.erase(from);
       }
@@ -754,7 +753,6 @@ ApWifiMac::Receive (Ptr<Packet> packet, const WifiMacHeader *hdr)
     }
   else if (hdr->IsMgt ())
     {
-                  std::cout << "MGT" << std::endl;
       if (hdr->IsProbeReq ())
         {
           NS_ASSERT (hdr->GetAddr1 ().IsBroadcast ());
